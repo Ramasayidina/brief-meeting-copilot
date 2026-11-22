@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Brief — Meeting Co-pilot for Even Realities G2</title>
+    <style>
+      :root {
+        --g2-green: #4dff7c;
+        --g2-dim: #1d7a3c;
+        --g2-faint: #0d3a1e;
+        --panel: #101418;
+        --ink: #e8ecef;
+        --muted: #9aa5ad;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: ui-sans-system, system-ui, "Segoe UI", Roboto, sans-serif;
+        background: #05070a;
+        color: var(--ink);
+      }
+      .wrap { max-width: 1060px; margin: 0 auto; padding: 28px 20px 48px; }
+      h1 { font-size: 26px; margin: 0 0 4px; }
+      .sub { color: var(--muted); margin: 0 0 24px; font-size: 15px; }
+      .stage { display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; }
+
+      /* --- glasses ----------------------------------------------------- */
+      .glasses-col { flex: 0 0 auto; }
+      .glasses {
+        background: linear-gradient(180deg, #171b20, #0b0e11);
+        border: 1px solid #262c33;
+        border-radius: 22px;
+        padding: 26px 26px 18px;
+      }
+      .lens-label {
+        color: var(--muted); font-size: 11px; letter-spacing: .12em;
+        text-transform: uppercase; margin-bottom: 8px;
+      }
+      /* The screen is exactly the G2 canvas: 576×288 CSS px, scaled up
+         1.25× purely for legibility in the demo. App coordinates inside
+         stay true 576×288. */
+      .screen-frame {
+        width: 720px; height: 360px;
+        background: #000;
+        border-radius: 10px;
+        border: 1px solid var(--g2-faint);
+        overflow: hidden;
+      }
+      #glasses-screen {
+        position: relative;
+        width: 576px; height: 288px;
+        transform: scale(1.25);
+        transform-origin: top left;
+        background: #010402;
+        cursor: pointer;
+        user-select: none;
+        font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      }
+      .g-container {
+        position: absolute;
+        overflow: hidden;
+        white-space: pre-wrap;
+        word-break: break-word;
+        color: var(--g2-green);
+        font-size: 18px;
+        line-height: 1.32;
+        padding: 4px 8px;
+        text-shadow: 0 0 6px rgba(77, 255, 124, .35);
+      }
+      .g-header { font-size: 15px; color: var(--g2-dim); letter-spacing: .04em; }
+      .g-footer { font-size: 14px; color: var(--g2-dim); border-top: 1px solid var(--g2-faint); }
+      .g-list { padding: 6px; }
+      .g-item {
+        padding: 7px 10px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .g-selected { border-color: var(--g2-green); background: rgba(77, 255, 124, .08); }
+      .g-exit-dialog {
+        position: absolute; inset: 0;
+        display: flex; align-items: center; justify-content: center;
+        text-align: center; white-space: pre-wrap;
+        background: rgba(1, 4, 2, .92); color: var(--g2-green);
+        font-size: 20px; z-index: 5;
+      }
+      .controls { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+      .controls button {
+        background: #161b21; color: var(--ink);
+        border: 1px solid #2b333c; border-radius: 8px;
+        padding: 9px 13px; font-size: 13px; cursor: pointer;
+      }
+      .controls button:hover { border-color: var(--g2-dim); }
+      .keys { color: var(--muted); font-size: 12.5px; margin-top: 10px; line-height: 1.7; }
+      .keys b { color: var(--ink); font-weight: 600; }
+
+      /* --- phone-side panel -------------------------------------------- */
+      .panel {
+        flex: 1 1 260px; min-width: 260px;
+        background: var(--panel);
+        border: 1px solid #232a31; border-radius: 14px;
+        padding: 16px 18px;
+      }
+      .panel h2 { font-size: 14px; margin: 0 0 2px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+      .panel .screen-name { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+      .panel .screen-name span { color: var(--g2-green); font-family: ui-monospace, Menlo, monospace; }
+      #write-log { display: flex; flex-direction: column; gap: 10px; }
+      .log-entry {
+        background: #0b0f13; border: 1px solid #223028; border-radius: 8px;
+        padding: 9px 11px; font-size: 12.5px; line-height: 1.55;
+        white-space: pre-wrap; word-break: break-word;
+        font-family: ui-monospace, Menlo, Consolas, monospace; color: #c9f5d6;
+      }
+      .log-empty { color: var(--muted); font-size: 13px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Brief — Meeting Co-pilot</h1>
+      <p class="sub">
+        A glanceable AI assistant for the Even Realities G2 · Heads Up hackathon ·
+        Track 04 — AI Assistants &amp; Work (Google Calendar · Gmail · AI)
+      </p>
+
+      <div class="stage">
+        <div class="glasses-col">
+          <div class="glasses">
+            <div class="lens-label">Even Realities G2 · 576 × 288 · browser simulator</div>
+            <div class="screen-frame">
+              <div id="glasses-screen"></div>
+            </div>
+            <div class="controls">
+              <button data-gesture="tap">Tap</button>
+              <button data-gesture="double">Double-tap</button>
+              <button data-gesture="up">Swipe ↑</button>
+              <button data-gesture="down">Swipe ↓</button>
+              <button data-gesture="hold">Hold (ask AI)</button>
+            </div>
+            <p class="keys">
+              Or click the lens: <b>click</b> tap · <b>double-click</b> back ·
+              <b>hold 0.6s</b> ask AI · <b>scroll / ↑ ↓</b> swipe ·
+              <b>Enter</b> tap · <b>Esc</b> back · <b>L</b> ask AI
+            </p>
+          </div>
+        </div>
+
+        <aside class="panel">
+          <h2>Phone side — write actions</h2>
+          <p class="screen-name">Current screen: <span id="panel-screen">boot</span></p>
+          <div id="write-log">
+            <p class="log-empty">
+              Nothing sent yet. Send a late note, approve the follow-up email, or
+              move a meeting from the glasses — every write lands here, exactly as
+              it would leave Gmail / Google Calendar in production.
+            </p>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
